@@ -1,10 +1,20 @@
 # -*- coding: utf-8 -*-
 import time
+import sys
+import os
 from windows.base_window import open_window, create_window
 from scrapers import external, folders
 from modules import debrid, kodi_utils, settings, metadata, watched_status
-from magneto import sources as magneto_sources
 from modules.debrid import debrid_enabled
+
+# Add magneto module to path
+try:
+	magneto_path = os.path.join(os.path.dirname(__file__), '../../..', 'script.module.magneto', 'lib')
+	if magneto_path not in sys.path:
+		sys.path.insert(0, magneto_path)
+	from magneto import sources as magneto_sources
+except:
+	magneto_sources = None
 from modules.player import FenPlayer
 from modules.source_utils import get_cache_expiry, make_alias_dict
 from modules.utils import clean_file_name, string_to_float, safe_string, remove_accents, get_datetime, append_module_to_syspath, manual_function_import, manual_module_import
@@ -301,6 +311,8 @@ class Sources():
 
 	def magneto_provider_sources(self):
 		try:
+			if magneto_sources is None:
+				return []
 			provider_list = magneto_sources(ret_all=self.disabled_ext_ignored)
 			sourceDict = [(i[0], i[1]) for i in provider_list]
 		except: sourceDict = []
