@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 import time
+import sys
+import os
+try:
+	_magneto_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'script.module.magneto', 'lib')
+	sys.path.insert(0, _magneto_path)
+	from magneto import sources as magneto_sources
+except:
+	magneto_sources = None
 from windows.base_window import open_window, create_window
 from scrapers import external, folders
 from modules import debrid, kodi_utils, settings, metadata, watched_status
@@ -124,6 +132,11 @@ class Sources():
 		threads_append = self.threads.append
 		if self.active_folders: self.append_folder_scrapers(self.providers)
 		self.providers.extend(self.internal_sources())
+		if magneto_sources:
+			try:
+				for _name, _loader in magneto_sources():
+					threads_append(Thread(target=self.activate_providers, args=(_name, _loader, False), name=_name))
+			except: pass
 		if self.providers:
 			for i in self.providers: threads_append(Thread(target=self.activate_providers, args=(i[0], i[1], False), name=i[2]))
 			[i.start() for i in self.threads]
